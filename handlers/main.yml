@@ -1,0 +1,5 @@
+---
+- name: "Update CAs"
+  register: output
+  changed_when: output.rc != 0
+  ansible.builtin.shell: "update-ca-certificates"

@@ -1,0 +1,60 @@
+---
+# if you have any prepararion task
+- name: "Prepare"
+  hosts: "all"
+  gather_facts: true
+  tasks:
+
+    - name: "Include cryptographic content var file"
+      ansible.builtin.include_vars: "../../tests/certs/main.yml"
+
+    - name: "Include labocbz.prepare_host"
+      tags:
+        - "labocbz.prepare_host"
+      ansible.builtin.include_role:
+        name: "labocbz.prepare_host"
+
+    - name: "Gather facts from all hosts"
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      loop: "{{ groups['all'] }}"
+      ansible.builtin.setup:
+
+    - name: "Edit /etc/hosts file to add all hosts"
+      loop: "{{ groups['all'] }}"
+      loop_control:
+        loop_var: host
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.shell: "echo \"{{ hostvars[host]['ansible_default_ipv4']['address'] }}  {{ host }} # from Molecule\" >> /etc/hosts"
+
+    - name: "Import cryptographic content if needed"
+      run_once: yes
+      loop: "{{ inv_cert_bundles }}"
+      loop_control:
+        loop_var: bundle
+      ansible.builtin.copy:
+        src: "../../tests/certs/{{ bundle.name }}.zip"
+        dest: "/tmp/{{ bundle.name }}.zip"
+        owner: "root"
+        group: "root"
+        mode: 0700
+
+    - name: "Include labocbz.add_certificates"
+      tags:
+        - "labocbz.add_certificates"
+      loop: "{{ inv_cert_bundles }}"
+      loop_control:
+        loop_var: bundle
+      vars:
+        add_certificates_bundle_name: "{{ bundle.name }}"
+        add_certificates_bundle_type: "{{ bundle.type }}"
+        add_certificates_bundle_src: "{{ bundle.src }}"
+        add_certificates_bundle_dest: "{{ bundle.dest }}"
+        #add_certificates_bundle_src_user: "{{ bundle.src_user }}"
+        #add_certificates_bundle_src_password: "{{ bundle.src_password }}"
+        #add_certificates_bundle_dest_user: "{{ bundle.dest_user }}"
+        #add_certificates_bundle_dest_group: "{{ bundle.dest_group }}"
+        #add_certificates_bundle_dest_mode: "{{ bundle.dest_mode }}"
+      ansible.builtin.include_role:
+        name: "labocbz.add_certificates"

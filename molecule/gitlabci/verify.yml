@@ -1,0 +1,16 @@
+---
+# Don't forget to keep this file updated
+# molecule/<scenario>/verify.yml
+- name: "Verify"
+  hosts: "all"
+  gather_facts: false
+  tasks:
+
+    - name: "Check all deployed bundles"
+      register: folder_check
+      failed_when: not folder_check.stat.exists
+      loop: "{{ inv_cert_bundles }}"
+      loop_control:
+        loop_var: bundle
+      ansible.builtin.stat:
+        path: "{{ bundle.dest }}/{{ bundle.name }}"
