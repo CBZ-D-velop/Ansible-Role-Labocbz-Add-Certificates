@@ -1,6 +1,6 @@
 ---
 inv_prepare_host_users:
-  - name: "logstash"
+  - login: "logstash"
     group: "logstash"
 
 inv_cert_bundles:
