@@ -1,24 +1,25 @@
 ---
-- name: "Prepare workspace"
-  block:
-    - name: "Check if workspace exist"
-      register: add_certificates_tmp_workspace_stat
-      ansible.builtin.stat:
-        path: "{{ add_certificates_tmp_workspace }}"
-
-    - name: "Create workspace"
-      when: not add_certificates_tmp_workspace_stat.stat.exists
-      ansible.builtin.file:
-        path: "{{ add_certificates_tmp_workspace }}"
-        state: directory
-        recurse: yes
-        owner: "{{ add_certificates_bundle_dest_user }}"
-        group: "{{ add_certificates_bundle_dest_group }}"
-        mode: "{{ add_certificates_bundle_dest_mode }}"
-
 - name: "Get files from sources"
   run_once: true
+  delegate_to: "{{ ansible_play_hosts[0] }}"
   block:
+    - name: "Prepare workspace"
+      block:
+        - name: "Check if workspace exist"
+          register: add_certificates_tmp_workspace_stat
+          ansible.builtin.stat:
+            path: "{{ add_certificates_tmp_workspace }}"
+
+        - name: "Create workspace"
+          when: not add_certificates_tmp_workspace_stat.stat.exists
+          ansible.builtin.file:
+            path: "{{ add_certificates_tmp_workspace }}"
+            state: directory
+            recurse: yes
+            owner: "{{ add_certificates_bundle_dest_user }}"
+            group: "{{ add_certificates_bundle_dest_group }}"
+            mode: "{{ add_certificates_bundle_dest_mode }}"
+
     - name: "Get bundle from remote source"
       when: add_certificates_bundle_src is match("http.*://.*")
       ansible.builtin.get_url:
