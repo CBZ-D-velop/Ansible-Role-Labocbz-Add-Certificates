@@ -1,5 +1,6 @@
 ---
 add_certificates_tmp_workspace: "/tmp/add_certificates"
+add_ca_location: "/etc/ssl/certs/"
 
 add_certificates_bundle_name: "My-CA-Authority"
 add_certificates_bundle_type: "CA"

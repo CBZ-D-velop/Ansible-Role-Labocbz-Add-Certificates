@@ -111,6 +111,7 @@ Some vars a required to run this role:
 ```YAML
 ---
 add_certificates_tmp_workspace: "/tmp/add_certificates"
+add_ca_location: "/etc/ssl/certs/"
 
 add_certificates_bundle_name: "My-CA-Authority"
 add_certificates_bundle_type: "CA"
@@ -124,6 +125,7 @@ add_certificates_bundle_dest_mode: "0755"
 
 add_certificates_artifactory_login: "myUser"
 add_certificates_artifactory_password: "myUserPassword"
+
 ```
 
 The best way is to modify these vars by copy the ./default/main.yml file into the ./vars and edit with your personnals requirements.
@@ -135,28 +137,58 @@ In order to surchage vars, you have multiples possibilities but for mains cases 
 ```YAML
 # From inventory
 ---
-inv_add_certificates_artifactory_password: "myPassword"
-inv_add_certificates_artifactory_login: "myUser"
+inv_prepare_host_users:
+  - login: "logstash"
+    group: "logstash"
 
 inv_cert_bundles:
-  - name: "My-CA-Authority"
+  - name: "My-Local-Root-CA"
     type: "CA"
-    src: "/tmp/ssl/My-CA-Authority.zip"
-    dest: "/tmp/deployed_ssl_1"
-    #src_user: "myUser"
-    #src_password: "secretPassword"
-    #dest_user: "root"
-    #dest_group: "root"
-    #dest_mode: 0644
-  - name: "my-https-ca-signed-website"
-    type: "cert"
-    src: "/tmp/ssl/my-https-ca-signed-website.zip"
-    dest: "/tmp/deployed_ssl_2"
-    #src_user: "myUser"
-    #src_password: "secretPassword"
-    #dest_user: "root"
-    #dest_group: "root"
-    #dest_mode: 0644
+    src: "/tmp/My-Local-Root-CA.zip"
+    dest: "/tmp/ssl"
+    dest_user: "root"
+    dest_group: "root"
+    dest_mode: "0755"
+
+  - name: "My-Local-Middle-One-CA"
+    type: "CA"
+    src: "/tmp/My-Local-Middle-One-CA.zip"
+    dest: "/tmp/ssl"
+    dest_user: "root"
+    dest_group: "root"
+    dest_mode: "0755"
+
+  - name: "My-Local-Middle-Two-CA"
+    type: "CA"
+    src: "/tmp/My-Local-Middle-Two-CA.zip"
+    dest: "/tmp/ssl"
+    dest_user: "root"
+    dest_group: "root"
+    dest_mode: "0755"
+
+  - name: "my-end-certificate-1.domain.tld"
+    type: "CA"
+    src: "/tmp/my-end-certificate-1.domain.tld.zip"
+    dest: "/tmp/ssl"
+    dest_user: "logstash"
+    dest_group: "logstash"
+    dest_mode: "0755"
+
+  - name: "my-end-certificate-2.domain.tld"
+    type: "CA"
+    src: "/tmp/my-end-certificate-2.domain.tld.zip"
+    dest: "/tmp/ssl"
+    dest_user: "logstash"
+    dest_group: "logstash"
+    dest_mode: "0755"
+
+  - name: "my-end-certificate-3.domain.tld"
+    type: "CA"
+    src: "/tmp/my-end-certificate-3.domain.tld.zip"
+    dest: "/tmp/ssl"
+    dest_user: "logstash"
+    dest_group: "logstash"
+    dest_mode: "0755"
 
 ```
 

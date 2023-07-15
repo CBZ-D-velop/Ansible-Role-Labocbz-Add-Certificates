@@ -90,7 +90,7 @@
       ansible.builtin.copy:
         remote_src: yes
         src: "{{ add_certificates_bundle_dest }}/{{ add_certificates_bundle_name }}"
-        dest: "/etc/pki/ca-trust/source/trusted"
+        dest: "{{ add_ca_location }}"
         owner: "{{ add_certificates_bundle_dest_user }}"
         group: "{{ add_certificates_bundle_dest_group }}"
         mode: "{{ add_certificates_bundle_dest_mode }}"
