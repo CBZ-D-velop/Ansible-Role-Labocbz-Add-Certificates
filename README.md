@@ -17,6 +17,16 @@
 
 An Ansible role install a CA your server and/or get cryptographic content.
 
+The Ansible role enables the import of SSL certificate bundles, which are files either in ZIP format or any other archive format, both locally and remotely. When the type of bundle is specified as a CA (Certificate Authority), the role automatically includes it in the cacerts of the target machines, enhancing the security and trust of SSL communications.
+
+In the context of SSL communication, Certificate Authorities play a crucial role in establishing trust between clients and servers. When a certificate is signed by a trusted CA, it verifies the authenticity and integrity of the certificate, enabling secure connections between systems. The role's ability to automatically add the CA bundle to the cacerts ensures that the target machines trust the certificates issued by that particular Certificate Authority.
+
+By seamlessly updating the cacerts with the CA bundle, the role streamlines the process of establishing trust between the target system and the Certificate Authority. This ensures that SSL connections are secured and authenticated, allowing clients to confidently trust the certificates presented by the servers.
+
+In addition to handling CA bundles, the role efficiently manages both local and remote files, performing necessary fetch and placement operations. The inclusion of basic authentication support enhances the security of remote file handling, ensuring that SSL certificate bundles are retrieved securely.
+
+In summary, the Ansible role provides a comprehensive solution for SSL certificate management, offering flexibility in handling various types of bundles, including CAs. The automatic inclusion of CA bundles in the cacerts of target machines streamlines the trust establishment process, ensuring secure and authenticated SSL connections within the environment.
+
 ## Folder structure
 
 By default Ansible will look in each directory within a role for a main.yml file for relevant content (also man.yml and main):
