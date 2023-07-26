@@ -1,3 +1,24 @@
 ---
 
-#inv_cert_bundles:
+inv_cert_bundles:
+  - name: "My-Local-Ansible-Root-CA.pem.crt"
+    type: "CA"
+    src: "/tmp/My-Local-Ansible-Root-CA.pem.crt"
+
+  - name: "My-Local-Ansible-Intermediate-CA-1.pem.crt"
+    type: "CA"
+    src: "/tmp/My-Local-Ansible-Intermediate-CA-1.pem.crt"
+
+  - name: "My-Local-Ansible-Intermediate-CA-2.pem.crt"
+    type: "CA"
+    src: "/tmp/My-Local-Ansible-Intermediate-CA-2.pem.crt"
+
+  - name: "my-cluster.domain.tld"
+    src: "/tmp/my-cluster.domain.tld.zip"
+    dest: "/tmp/ssl"
+    type: "cert"
+    #src_user: "***"
+    #src_password: "***"
+    dest_user: "logstash"
+    dest_group: "logstash"
+    dest_mode: "0755"
