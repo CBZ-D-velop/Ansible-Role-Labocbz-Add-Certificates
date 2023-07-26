@@ -1,7 +1,6 @@
 ---
-- name: "Get files from sources"
+- name: "Get all certs"
   run_once: true
-  delegate_to: "{{ ansible_play_hosts[0] }}"
   block:
     - name: "Prepare workspace"
       block:
@@ -16,42 +15,52 @@
             path: "{{ add_certificates_tmp_workspace }}"
             state: directory
             recurse: yes
-            owner: "{{ add_certificates_bundle_dest_user }}"
-            group: "{{ add_certificates_bundle_dest_group }}"
-            mode: "{{ add_certificates_bundle_dest_mode }}"
+            owner: "root"
+            group: "root"
+            mode: "0755"
 
-    - name: "Get bundle from remote source"
-      when: add_certificates_bundle_src is match("http.*://.*")
-      ansible.builtin.get_url:
-        url: "{{ add_certificates_bundle_src }}"
-        dest: "{{ add_certificates_tmp_workspace }}"
-        owner: "{{ add_certificates_bundle_dest_user }}"
-        group: "{{ add_certificates_bundle_dest_group }}"
-        mode: "{{ add_certificates_bundle_dest_mode }}"
-        validate_certs: false
-        timeout: 120
-        username: "{{ add_certificates_bundle_src_user }}"
-        password: "{{ add_certificates_bundle_src_password }}"
-        force_basic_auth: yes
+    - name: "Get files from sources"
+      block:
+        - name: "Get bundle from remote source"
+          when: add_certificates_bundle_src is match("http.*://.*")
+          ansible.builtin.get_url:
+            url: "{{ add_certificates_bundle_src }}"
+            dest: "{{ add_certificates_tmp_workspace }}"
+            owner: "root"
+            group: "root"
+            mode: "0755"
+            validate_certs: false
+            timeout: 120
+            username: "{{ add_certificates_bundle_src_user }}"
+            password: "{{ add_certificates_bundle_src_password }}"
+            force_basic_auth: yes
 
-    - name: "Get bundle from local source"
-      when: not add_certificates_bundle_src is match("http.*://.*")
-      ansible.builtin.copy:
-        remote_src: yes
-        src: "{{ add_certificates_bundle_src }}"
-        dest: "{{ add_certificates_tmp_workspace }}"
-        owner: "{{ add_certificates_bundle_dest_user }}"
-        group: "{{ add_certificates_bundle_dest_group }}"
-        mode: "{{ add_certificates_bundle_dest_mode }}"
+        - name: "Get bundle from local source"
+          when: not add_certificates_bundle_src is match("http.*://.*")
+          ansible.builtin.copy:
+            remote_src: yes
+            src: "{{ add_certificates_bundle_src }}"
+            dest: "{{ add_certificates_tmp_workspace }}"
+            owner: "root"
+            group: "root"
+            mode: "0755"
 
-    - name: "Fetch bundle on controller node"
-      ansible.builtin.fetch:
-        src: "{{ add_certificates_tmp_workspace }}/{{ add_certificates_bundle_name }}.zip"
-        dest: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}.zip"
-        flat: yes
+        - name: "Fetch bundle on controller node (cert)"
+          when: add_certificates_bundle_type == "cert"
+          ansible.builtin.fetch:
+            src: "{{ add_certificates_tmp_workspace }}/{{ add_certificates_bundle_name }}.zip"
+            dest: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}"
+            flat: yes
+
+        - name: "Fetch bundle on controller node (CA)"
+          when: add_certificates_bundle_type == "CA"
+          ansible.builtin.fetch:
+            src: "{{ add_certificates_tmp_workspace }}/{{ add_certificates_bundle_name }}"
+            dest: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}"
+            flat: yes
 
 - name: "Deploy bundler on servers"
-  notify: "Update CAs"
+  when: add_certificates_bundle_type == "cert"
   block:
     - name: "Check if bundle destination exist"
       register: add_certificates_bundle_dest_stat
@@ -71,7 +80,7 @@
     - name: "Import bundle"
       ansible.builtin.copy:
         dest: "{{ add_certificates_bundle_dest }}/{{ add_certificates_bundle_name }}.zip"
-        src: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}.zip"
+        src: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}"
         owner: "{{ add_certificates_bundle_dest_user }}"
         group: "{{ add_certificates_bundle_dest_group }}"
         mode: "{{ add_certificates_bundle_dest_mode }}"
@@ -85,12 +94,40 @@
         mode: "{{ add_certificates_bundle_dest_mode }}"
         remote_src: yes
 
-    - name: "Import CA on hosts"
-      when: add_certificates_bundle_type == "CA"
+- name: "Import CA on hosts"
+  when: add_certificates_bundle_type == "CA"
+  block:
+    - name: "Import bundle"
+      ansible.builtin.copy:
+        dest: "{{ add_certificates_bundle_src }}"
+        src: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}"
+        owner: "root"
+        group: "root"
+        mode: "0711"
+
+    - name: "Create CA directories"
+      ansible.builtin.file:
+        state: "directory"
+        path: "{{ add_certificates_ca_location }}"
+        owner: "root"
+        group: "root"
+        mode: "0711"
+
+    - name: "Enable dynamic CA configuration"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "update-ca-trust enable"
+
+    - name: "Import CA"
       ansible.builtin.copy:
         remote_src: yes
-        src: "{{ add_certificates_bundle_dest }}/{{ add_certificates_bundle_name }}"
-        dest: "{{ add_certificates_ca_location }}"
-        owner: "{{ add_certificates_bundle_dest_user }}"
-        group: "{{ add_certificates_bundle_dest_group }}"
-        mode: "{{ add_certificates_bundle_dest_mode }}"
+        src: "{{ add_certificates_ca_location }}/{{ add_certificates_bundle_name }}"
+        dest: "{{ path }}"
+        owner: "root"
+        group: "root"
+        mode: "0711"
+
+    - name: "Extract and add"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "update-ca-trust extract"
