@@ -96,6 +96,7 @@
 
 - name: "Import CA on hosts"
   when: add_certificates_bundle_type == "CA"
+  notify: "Update CAs"
   block:
     - name: "Import bundle"
       ansible.builtin.copy:
@@ -113,21 +114,11 @@
         group: "root"
         mode: "0711"
 
-    - name: "Enable dynamic CA configuration"
-      register: output
-      changed_when: output.rc != 0
-      ansible.builtin.command: "update-ca-trust enable"
-
     - name: "Import CA"
       ansible.builtin.copy:
         remote_src: yes
-        src: "{{ add_certificates_ca_location }}/{{ add_certificates_bundle_name }}"
-        dest: "{{ path }}"
+        dest: "{{ add_certificates_ca_location }}/{{ add_certificates_bundle_name }}"
+        src: "{{ add_certificates_bundle_src }}"
         owner: "root"
         group: "root"
         mode: "0711"
-
-    - name: "Extract and add"
-      register: output
-      changed_when: output.rc != 0
-      ansible.builtin.command: "update-ca-trust extract"
