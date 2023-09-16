@@ -49,7 +49,7 @@
           when: add_certificates_bundle_type == "cert"
           ansible.builtin.fetch:
             src: "{{ add_certificates_tmp_workspace }}/{{ add_certificates_bundle_name }}.zip"
-            dest: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}"
+            dest: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}.zip"
             flat: yes
 
         - name: "Fetch bundle on controller node (CA)"
@@ -80,7 +80,7 @@
     - name: "Import bundle"
       ansible.builtin.copy:
         dest: "{{ add_certificates_bundle_dest }}/{{ add_certificates_bundle_name }}.zip"
-        src: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}"
+        src: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}.zip"
         owner: "{{ add_certificates_bundle_dest_user }}"
         group: "{{ add_certificates_bundle_dest_group }}"
         mode: "{{ add_certificates_bundle_dest_mode }}"
