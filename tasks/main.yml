@@ -98,27 +98,26 @@
   when: add_certificates_bundle_type == "CA"
   notify: "Update CAs"
   block:
-    - name: "Import bundle"
+    - name: "Check if bundle destination exist CA on host"
+      register: add_certificates_ca_location_stat
+      ansible.builtin.stat:
+        path: "{{ add_certificates_ca_location }}"
+
+    - name: "Create bundle destination CA on host"
+      when: not add_certificates_ca_location_stat.stat.exists
+      ansible.builtin.file:
+        path: "{{ add_certificates_ca_location }}"
+        state: directory
+        recurse: yes
+        owner: "{{ add_certificates_bundle_dest_user }}"
+        group: "{{ add_certificates_bundle_dest_group }}"
+        mode: "{{ add_certificates_bundle_dest_mode }}"
+
+    - name: "Import bundle CA on host"
       ansible.builtin.copy:
-        dest: "{{ add_certificates_bundle_src }}"
+        dest: "{{ add_certificates_ca_location }}/"
         src: "/tmp/.ansible/add_certificates/{{ add_certificates_bundle_name }}"
         owner: "root"
         group: "root"
         mode: "0711"
 
-    - name: "Create CA directories"
-      ansible.builtin.file:
-        state: "directory"
-        path: "{{ add_certificates_ca_location }}"
-        owner: "root"
-        group: "root"
-        mode: "0711"
-
-    - name: "Import CA"
-      ansible.builtin.copy:
-        remote_src: yes
-        dest: "{{ add_certificates_ca_location }}/{{ add_certificates_bundle_name }}"
-        src: "{{ add_certificates_bundle_src }}"
-        owner: "root"
-        group: "root"
-        mode: "0711"
