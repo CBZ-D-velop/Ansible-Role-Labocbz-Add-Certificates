@@ -9,15 +9,13 @@ driver:
 
 platforms:
   - name: "molecule-local-instance-1-add-certificates"
-    #image: "docker.io/geerlingguy/docker-debian11-ansible"
-    image: "local/debian-11-ansible:v3.0"
+    image: "robincbz/debian-11-ansible:latest"
     #published_ports:
     #  - "0.0.0.0:8181:8181/tcp"
     dockerfile: "Dockerfile"
     privileged: true
     pre_build_image: true
     override_command: true
-    command: "/sbin/init"
     tmpfs:
       - "/run"
       - "/tmp"
@@ -30,15 +28,13 @@ platforms:
     #storage_driver: overlay
 
   - name: "molecule-local-instance-2-add-certificates"
-    #image: "docker.io/geerlingguy/docker-debian11-ansible"
-    image: "local/debian-11-ansible:v3.0"
+    image: "robincbz/debian-11-ansible:latest"
     #published_ports:
     #  - "0.0.0.0:8181:8181/tcp"
     dockerfile: "Dockerfile"
     privileged: true
     pre_build_image: true
     override_command: true
-    command: "/sbin/init"
     tmpfs:
       - "/run"
       - "/tmp"
@@ -51,15 +47,13 @@ platforms:
     #storage_driver: overlay
 
   - name: "molecule-local-instance-3-add-certificates"
-    #image: "docker.io/geerlingguy/docker-debian11-ansible"
-    image: "local/debian-11-ansible:v3.0"
+    image: "robincbz/debian-11-ansible:latest"
     #published_ports:
     #  - "0.0.0.0:8181:8181/tcp"
     dockerfile: "Dockerfile"
     privileged: true
     pre_build_image: true
     override_command: true
-    command: "/sbin/init"
     tmpfs:
       - "/run"
       - "/tmp"
@@ -69,13 +63,7 @@ platforms:
     cgroupns_mode: "host"
     cgroup_manager: "cgroupfs"
     #storage_opt: overlay.mount_program=/usr/bin/fuse-overlayfs
-    #storage_driver: overlay
-
-lint: |
-  set -e
-  yamllint .
-  ansible-lint
-  flake8
+    #storage_driver: "overlay"
 
 provisioner:
   name: "ansible"
@@ -105,14 +93,11 @@ verifier:
 scenario:
   name: "default"
   test_sequence:
-    - "lint"
     - "destroy"
-    #- "dependency" # need a "requirements.yml" file
     - "syntax"
     - "create"
     - "prepare"
     - "converge"
     - "idempotence"
-    #- "side_effect" # need a "requirements.yml" file
     - "verify"
     - "destroy"
