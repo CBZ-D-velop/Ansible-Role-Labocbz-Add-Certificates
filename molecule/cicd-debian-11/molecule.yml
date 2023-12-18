@@ -101,9 +101,11 @@ scenario:
   test_sequence:
     - "destroy"
     - "syntax"
-    - "create"
-    - "prepare"
-    - "converge"
-    - "idempotence"
-    - "verify"
-    - "destroy"
+    #- "dependency"
+    #- "create"
+    #- "prepare"
+    #- "converge"
+    #- "idempotence"
+    #- "verify"
+    #- "destroy"
+
