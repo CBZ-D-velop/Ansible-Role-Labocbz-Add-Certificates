@@ -2,12 +2,6 @@
 - name: "Converge"
   hosts: "cicd-debian-12"
   tasks:
-    # replace these tasks with whatever you find suitable to test
-    - name: "Copy something to test use of synchronize module"
-      ansible.builtin.copy:
-        src: "/etc/hosts"
-        dest: "/tmp/hosts-from-controller"
-        mode: 0700
 
     - name: "Include labocbz.add_certificates"
       tags:
