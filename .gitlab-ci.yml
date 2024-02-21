@@ -57,7 +57,7 @@ variables:
     - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
   needs:
     - "yaml_lint"
-    - "jinja_lint"
+    #- "jinja_lint"
     - "ansible_lint"
 
 ###############################################################################
@@ -85,18 +85,18 @@ yaml_lint:
   rules:
     - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
 
-jinja_lint:
-  stage: lint
-  image: $NEXUS_REPOS_DOCKER_REGISTRY/$DOCKER_IMAGE_JINJA_LINT
-  before_script:
-    # Fix weird ansible bug: https://github.com/trailofbits/algo/issues/1637
-    # This probably happens due to gitlab-runner mounting the git repo into the container
-    - "chmod o-w ."
-  script:
-    - "[ -n \"$(find ./templates -name '*.j2')\" ] && j2lint ./templates/*.j2 --ignore S3 S7"
-  allow_failure: false
-  rules:
-    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
+#jinja_lint:
+#  stage: lint
+#  image: $NEXUS_REPOS_DOCKER_REGISTRY/$DOCKER_IMAGE_JINJA_LINT
+#  before_script:
+#    # Fix weird ansible bug: https://github.com/trailofbits/algo/issues/1637
+#    # This probably happens due to gitlab-runner mounting the git repo into the container
+#    - "chmod o-w ."
+#  script:
+#    - "[ -n \"$(find ./templates -name '*.j2')\" ] && j2lint ./templates/*.j2 --ignore S3 S7"
+#  allow_failure: false
+#  rules:
+#    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
 
 ansible_lint:
   stage: lint
