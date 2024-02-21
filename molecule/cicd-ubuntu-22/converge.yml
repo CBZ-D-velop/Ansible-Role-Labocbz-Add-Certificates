@@ -1,6 +1,6 @@
 ---
 - name: "Converge"
-  hosts: "local"
+  hosts: "cicd-ubuntu-22"
   tasks:
     # replace these tasks with whatever you find suitable to test
     - name: "Copy something to test use of synchronize module"
@@ -12,10 +12,10 @@
     - name: "Include labocbz.add_certificates"
       tags:
       - "labocbz.add_certificates"
-      loop: "{{ inv_cert_bundles }}"
+      loop: "{{ inv_add_certificates }}"
       loop_control:
         loop_var: bundle
-      when: inv_cert_bundles is defined
+      when: inv_add_certificates is defined
       vars:
         add_certificates__bundle_name: "{{ bundle.name }}"
         add_certificates__bundle_type: "{{ bundle.type }}"

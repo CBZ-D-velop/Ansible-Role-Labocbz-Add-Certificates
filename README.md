@@ -110,21 +110,21 @@ Some vars a required to run this role:
 
 ```YAML
 ---
-add_certificates_tmp_workspace: "/tmp/add_certificates"
-add_ca_location: "/etc/ssl/certs/"
+add_certificates__tmp_workspace: "/tmp/add_certificates"
+add_certificates__ca_location: "/usr/local/share/ca-certificates"
 
-add_certificates_bundle_name: "My-CA-Authority"
-add_certificates_bundle_type: "CA"
-add_certificates_bundle_src: "/tmp/ssl/{{ add_certificates_bundle_name }}.zip"
-add_certificates_bundle_dest: "/tmp/deployed_ssl"
-add_certificates_bundle_src_user: "myUser"
-add_certificates_bundle_src_password: "secretPassword"
-add_certificates_bundle_dest_user: "root"
-add_certificates_bundle_dest_group: "root"
-add_certificates_bundle_dest_mode: "0755"
+add_certificates__bundle_name: "My-CA-Authority"
+add_certificates__bundle_type: "CA"
+add_certificates__bundle_src: "/tmp/ssl/{{ add_certificates__bundle_name }}.zip"
+add_certificates__bundle_dest: "/tmp/deployed_ssl"
+add_certificates__bundle_src_user: "myUser"
+add_certificates__bundle_src_password: "secretPassword"
+add_certificates__bundle_dest_user: "root"
+add_certificates__bundle_dest_group: "root"
+add_certificates__bundle_dest_mode: "0755"
 
-add_certificates_artifactory_login: "myUser"
-add_certificates_artifactory_password: "myUserPassword"
+add_certificates__artifactory_login: "myUser"
+add_certificates__artifactory_password: "myUserPassword"
 
 ```
 
@@ -136,66 +136,34 @@ In order to surchage vars, you have multiples possibilities but for mains cases 
 
 ```YAML
 # From inventory
----
-inv_prepare_host_users:
-  - login: "logstash"
-    group: "logstash"
-
-inv_cert_bundles:
-  - name: "My-Local-Root-CA"
+inv_add_certificates:
+  - name: "My-Local-Ansible-Root-CA.pem.crt"
     type: "CA"
-    src: "/tmp/My-Local-Root-CA.zip"
+    src: "/tmp/My-Local-Ansible-Root-CA.pem.crt"
+
+  - name: "My-Local-Ansible-Intermediate-CA-1.pem.crt"
+    type: "CA"
+    src: "/tmp/My-Local-Ansible-Intermediate-CA-1.pem.crt"
+
+  - name: "My-Local-Ansible-Intermediate-CA-2.pem.crt"
+    type: "CA"
+    src: "/tmp/My-Local-Ansible-Intermediate-CA-2.pem.crt"
+
+  - name: "my-cluster.domain.tld"
+    src: "/tmp/my-cluster.domain.tld.zip"
     dest: "/tmp/ssl"
+    type: "cert"
+    #src_user: "***"
+    #src_password: "***"
     dest_user: "root"
     dest_group: "root"
     dest_mode: "0755"
-
-  - name: "My-Local-Middle-One-CA"
-    type: "CA"
-    src: "/tmp/My-Local-Middle-One-CA.zip"
-    dest: "/tmp/ssl"
-    dest_user: "root"
-    dest_group: "root"
-    dest_mode: "0755"
-
-  - name: "My-Local-Middle-Two-CA"
-    type: "CA"
-    src: "/tmp/My-Local-Middle-Two-CA.zip"
-    dest: "/tmp/ssl"
-    dest_user: "root"
-    dest_group: "root"
-    dest_mode: "0755"
-
-  - name: "my-end-certificate-1.domain.tld"
-    type: "CA"
-    src: "/tmp/my-end-certificate-1.domain.tld.zip"
-    dest: "/tmp/ssl"
-    dest_user: "logstash"
-    dest_group: "logstash"
-    dest_mode: "0755"
-
-  - name: "my-end-certificate-2.domain.tld"
-    type: "CA"
-    src: "/tmp/my-end-certificate-2.domain.tld.zip"
-    dest: "/tmp/ssl"
-    dest_user: "logstash"
-    dest_group: "logstash"
-    dest_mode: "0755"
-
-  - name: "my-end-certificate-3.domain.tld"
-    type: "CA"
-    src: "/tmp/my-end-certificate-3.domain.tld.zip"
-    dest: "/tmp/ssl"
-    dest_user: "logstash"
-    dest_group: "logstash"
-    dest_mode: "0755"
-
 ```
 
 ```YAML
 # From AWX / Tower
 ---
-all vars from to put/from AWX / Tower
+
 ```
 
 ### Run
@@ -205,22 +173,21 @@ To run this role, you can copy the molecule/default/converge.yml playbook and ad
 ```YAML
 - name: "Include labocbz.add_certificates"
   tags:
-    - "labocbz.add_certificates"
+  - "labocbz.add_certificates"
   loop: "{{ inv_cert_bundles }}"
   loop_control:
     loop_var: bundle
+  when: inv_cert_bundles is defined
   vars:
-    add_certificates_bundle_name: "{{ bundle.name }}"
-    add_certificates_bundle_type: "{{ bundle.type }}"
-    add_certificates_bundle_src: "{{ bundle.src }}"
-    add_certificates_bundle_dest: "{{ bundle.dest }}"
-    #add_certificates_bundle_src_user: "{{ bundle.src_user }}"
-    #add_certificates_bundle_src_password: "{{ bundle.src_password }}"
-    #add_certificates_bundle_dest_user: "{{ bundle.dest_user }}"
-    #add_certificates_bundle_dest_group: "{{ bundle.dest_group }}"
-    #add_certificates_bundle_dest_mode: "{{ bundle.dest_mode }}"
-    add_certificates_artifactory_login: "{{ inv_add_certificates_artifactory_login }}"
-    add_certificates_artifactory_password: "{{ inv_add_certificates_artifactory_password }}"
+    add_certificates__bundle_name: "{{ bundle.name }}"
+    add_certificates__bundle_type: "{{ bundle.type }}"
+    add_certificates__bundle_src: "{{ bundle.src }}"
+    add_certificates__bundle_dest: "{{ bundle.dest }}"
+    add_certificates__bundle_src_user: "{{ bundle.src_user }}"
+    add_certificates__bundle_src_password: "{{ bundle.src_password }}"
+    add_certificates__bundle_dest_user: "{{ bundle.dest_user }}"
+    add_certificates__bundle_dest_group: "{{ bundle.dest_group }}"
+    add_certificates__bundle_dest_mode: "{{ bundle.dest_mode }}"
   ansible.builtin.include_role:
     name: "labocbz.add_certificates"
 ```
@@ -247,6 +214,13 @@ Here you can put your change to keep a trace of your work and decisions.
 * Molecule now use remote Docker image by Lord Robin Crombez
 * Molecule now use custom Docker image in CI/CD by env vars
 * New CICD with needs and optimization
+
+### 2023-02-20: New CI, new Images
+
+* Added support for Ubuntu 22
+* Added support for Debian 11/12
+* Added new CI
+* Refresh vars __
 
 ## Authors
 

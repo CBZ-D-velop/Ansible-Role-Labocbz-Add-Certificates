@@ -8,11 +8,9 @@ driver:
   name: "docker"
 
 platforms:
-  - name: "molecule-local-instance-1-add-certificates"
-    image: "robincbz/debian-12-ansible:latest"
-    hostname: "molecule-local-instance-1-add-certificates"
-    #published_ports:
-    #  - "0.0.0.0:8181:8181/tcp"
+  - name: "molecule-cicd-ubuntu-22-instance-1-add-certificates"
+    image: "${NEXUS_REPOS_DOCKER_REGISTRY}/${DOCKER_IMAGE_UBUNTU_22_ANSIBLE}"
+    hostname: "molecule-cicd-ubuntu-22-instance-1-add-certificates"
     privileged: true
     pre_build_image: true
     command: "/sbin/init"
@@ -25,7 +23,7 @@ platforms:
     cgroup_manager: "cgroupfs"
     storage_driver: "overlay2"
     networks:
-      - name: "molecule-default-prepare-host"
+      - name: "molecule-cicd-ubuntu-22-prepare-host"
 
 provisioner:
   name: "ansible"
@@ -35,11 +33,11 @@ provisioner:
       group_vars: "../../tests/inventory/group_vars/"
       host_vars: "../../tests/inventory/host_vars/"
   options:
-    extra-vars: "@./tests/tower/tower.yml"
+    extra-vars: "@./../../tests/tower/tower.yml"
   log: ${MOLECULE_ANSIBLE_LOG:-true}
   env:
     ANSIBLE_CONFIG: "../../.ansible.cfg"
-    ANSIBLE_FORCE_COLOR: "True"
+    ANSIBLE_FORCE_COLOR: "true"
     # disable nologs
     MOLECULE_NOLOG: 0
     # disable destroy
@@ -53,7 +51,7 @@ verifier:
   name: "ansible"
 
 scenario:
-  name: "default"
+  name: "cicd-ubuntu-22"
   test_sequence:
     - "destroy"
     - "syntax"
