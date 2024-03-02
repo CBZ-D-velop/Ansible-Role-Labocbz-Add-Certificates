@@ -78,6 +78,7 @@
         mode: "{{ add_certificates__bundle_dest_mode }}"
 
     - name: "Import bundle"
+      changed_when: false
       ansible.builtin.copy:
         dest: "{{ add_certificates__bundle_dest }}/{{ add_certificates__bundle_name }}.zip"
         src: "/tmp/.ansible/add_certificates/{{ add_certificates__bundle_name }}.zip"
@@ -86,6 +87,7 @@
         mode: "{{ add_certificates__bundle_dest_mode }}"
 
     - name: "Deploy bundle"
+      changed_when: false
       ansible.builtin.unarchive:
         dest: "{{ add_certificates__bundle_dest }}"
         src: "{{ add_certificates__bundle_dest }}/{{ add_certificates__bundle_name }}.zip"
