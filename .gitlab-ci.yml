@@ -48,7 +48,6 @@ variables:
     - "docker login -u \"$GITLAB_CI_NEXUS_CREDENTIALS_USR\" -p \"$GITLAB_CI_NEXUS_CREDENTIALS_PSW\" \"http://$NEXUS_DOCKER_GROUP_REGISTRY\""
     - "python3 -m compileall /usr/lib/python3 -qq"
     - "cp ./.ansible.cfg /root/.ansible.cfg"
-
     - "[ -f \"./molecule/$SCENARIO/requirements.yml\" ] && ansible-galaxy install -r ./molecule/$SCENARIO/requirements.yml --roles-path=./molecule/$SCENARIO/roles"
   script:
     - "molecule test --scenario-name $SCENARIO"
@@ -73,7 +72,6 @@ include:
 lint:yaml:
   stage: lint
   image: $NEXUS_DOCKER_GROUP_REGISTRY/$DOCKER_IMAGE__LINT_YAML
-
   script:
     - yamllint --list-files ./
     - yamllint -c ./.yamllint ./
@@ -84,10 +82,6 @@ lint:yaml:
 #lint:jinja:
 #  stage: lint
 #  image: $NEXUS_DOCKER_GROUP_REGISTRY/$DOCKER_IMAGE__LINT_JINJA
-#  before_script:
-#    # Fix weird ansible bug: https://github.com/trailofbits/algo/issues/1637
-#    # This probably happens due to gitlab-runner mounting the git repo into the container
-#    #- "chmod o-w ."
 #  script:
 #    - "[ -n \"$(find ./templates -name '*.j2')\" ] && j2lint ./templates/*.j2 --ignore S3 S7"
 #  allow_failure: false
@@ -97,7 +91,6 @@ lint:yaml:
 lint:ansible:
   stage: lint
   image: $NEXUS_DOCKER_GROUP_REGISTRY/$DOCKER_IMAGE__LINT_ANSIBLE
-
   script:
     - ansible-lint --config=./.ansible-lint --exclude molecule --exclude tests ./*
   allow_failure: false
