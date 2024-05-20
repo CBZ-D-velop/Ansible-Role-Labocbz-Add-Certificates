@@ -12,7 +12,7 @@
       tags:
         - "labocbz.prepare_host"
       vars:
-        prepare_host_users: "{{ inv_prepare_host_users }}"
+        prepare_host__users: "{{ inv_prepare_host__users }}"
       ansible.builtin.include_role:
         name: "labocbz.prepare_host"
 
